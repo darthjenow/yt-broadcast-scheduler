@@ -1,8 +1,5 @@
 #!/usr/bin/python
-
 import httplib2
-import os
-import sys
 from pathlib import Path
 
 from apiclient.discovery import build
@@ -13,7 +10,7 @@ from oauth2client.tools import run_flow
 
 from googleapiclient.http import MediaFileUpload
 
-thumb_file = Path("thumb.jpg")
+THUMB_FILE = Path("thumb.jpg")
 
 CLIENT_SECRETS_FILE = Path("SECRET.json")
 TOKEN_FILE = Path("TOKEN.json")
@@ -56,7 +53,7 @@ def get_authenticated_service():
 
 # Create a liveBroadcast resource and set its title, scheduled start time,
 # scheduled end time, and privacy status.
-def insert_broadcast(youtube):
+def insert_broadcast(youtube, date):
 	insert_broadcast_response = youtube.liveBroadcasts().insert(
 		part="snippet,status",
 		body=dict(
@@ -68,7 +65,7 @@ def insert_broadcast(youtube):
 			width=1920,
 			height=1080
 		),
-				scheduledStartTime="2022-03-22T00:00:00+01:00"
+				scheduledStartTime=date
 			),
 			status=dict(
 				privacyStatus="private",
@@ -94,15 +91,18 @@ def set_thumbnail(youtube, id, file):
 
 	return response
 
-if __name__ == "__main__":
+def schedule_broadcast(date, thumbnail):
 	youtube = get_authenticated_service()
 	try:
-		broadcast_id = insert_broadcast(youtube)
+		broadcast_id = insert_broadcast(youtube, date)
 		
-		response = set_thumbnail(youtube, broadcast_id, thumb_file)
+		response = set_thumbnail(youtube, broadcast_id, thumbnail)
 		
 		print (response)
 	except HttpError as e:
 		print (f"A HTTP error {e.resp.status} occured:\n{e.content}")
 		
-		# send mail
+		# send mail	
+
+if __name__ == "__main__":
+	schedule_broadcast("2022-03-22T00:00:00+01:00", THUMB_FILE)
