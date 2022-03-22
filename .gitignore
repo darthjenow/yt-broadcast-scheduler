@@ -1,7 +1,7 @@
 .vscode
-*/__pycache__
+**/__pycache__
 
 SECRET.json
-TOKEN.json
+TOKEN.YOUTUBE.json
 TOKEN.GMAIL.json
 TOKEN.GDRIVE.json
