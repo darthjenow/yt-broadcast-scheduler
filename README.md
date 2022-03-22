@@ -6,4 +6,4 @@ Currently in development.
 - Thumbnail-Upload
 - send confirmation and errors over e-mail
 - create broadcasts by a schedule
-- create broadcasts by mail-information
+- create broadcasts by mail-information --> optional thumbnail as attachment

@@ -99,7 +99,7 @@ def check_mail():
 		# TODO(developer) - Handle errors from gmail API.
 		print(f'An error occurred: {error}')
 
-def send_mail(recipent, subject, body):
+def send_mail(recipent: str, subject: str, body: str):
 	service = get_service()
 
 	message = MIMEText(body)
