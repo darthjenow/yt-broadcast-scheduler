@@ -1,10 +1,4 @@
 {
-	"mail": {
-		"loggingAddresses": [
-			"rainer@zufall.com"	
-		],
-		"senderName": "broadcast-logging"
-	},
 	"date": {
 		"titleFormat": "%d.%m.%Y",
 		"descriptionFormat": "%d.%m.%Y",

@@ -1,7 +1,7 @@
 #!/usr/bin/python
-from datetime import datetime
 import httplib2
 from pathlib import Path
+import json
 
 from apiclient.discovery import build
 from apiclient.errors import HttpError
@@ -37,22 +37,17 @@ def get_authenticated_service():
 def insert_broadcast(youtube, config: dict):
 	insert_broadcast_response = youtube.liveBroadcasts().insert(
 		part="snippet,status",
-		body=dict(
-			snippet=dict(
-				title=config["title"],
-		description=config["description"],
-		thumbnails=dict(
-			url="",
-			width=1920,
-			height=1080
-		),
-				scheduledStartTime=config["scheduleDate"]
-			),
-			status=dict(
-				privacyStatus="private",
-				selfDeclaredMadeForKids=False
-			)
-		)
+		body={
+			"snippet": {
+				"title": config["title"],
+				"description": config["description"],
+				"scheduledStartTime": config["scheduleDate"]
+			},
+			"status": {
+				"privacyStatus": "private",
+				"selfDeclaredMadeForKids": False
+			}
+		}
 	).execute()
 
 	snippet = insert_broadcast_response["snippet"]
@@ -72,11 +67,31 @@ def set_thumbnail(youtube, id: str, file: Path):
 
 	return response
 
+def set_category(youtube, id: str, config):
+	response = youtube.videos().update(
+		part="snippet",
+		body={
+			"id": id,
+			"snippet": {
+				"title": config["title"],
+				"categoryId": config["category"],
+				"description": config["description"],
+				"scheduledStartTime": config["scheduleDate"]
+			}
+		}
+	).execute()
+
+	return response
+
 def schedule_broadcast(thumbnail_path: Path, config: dict):
 	youtube = get_authenticated_service()
 	try:
 		broadcast_id = insert_broadcast(youtube, config)
-		
+
+		response = set_category(youtube, broadcast_id, config)
+
+		print (response)
+
 		response = set_thumbnail(youtube, broadcast_id, thumbnail_path)
 	except HttpError as e:
 			print (f"A HTTP error {e.resp.status} occured:\n{e.content}")
