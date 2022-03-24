@@ -11,5 +11,3 @@ Currently in development.
 # YouTube-Broadcast settings, that need to be implemented
 - Tags
 - Stream language
-- Autostart
-- Autostop

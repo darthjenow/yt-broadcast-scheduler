@@ -1,7 +1,6 @@
 #!/usr/bin/python
 import httplib2
 from pathlib import Path
-import json
 
 from apiclient.discovery import build
 from apiclient.errors import HttpError
@@ -36,7 +35,7 @@ def get_authenticated_service():
 # scheduled end time, and privacy status.
 def insert_broadcast(youtube, config: dict):
 	insert_broadcast_response = youtube.liveBroadcasts().insert(
-		part="snippet,status",
+		part="snippet,status,contentDetails",
 		body={
 			"snippet": {
 				"title": config["title"],
@@ -46,16 +45,15 @@ def insert_broadcast(youtube, config: dict):
 			"status": {
 				"privacyStatus": "private",
 				"selfDeclaredMadeForKids": False
+			},
+			"contentDetails": {
+				"enableAutoStart": True,
+				"enableAutoStop": True
 			}
 		}
 	).execute()
 
-	snippet = insert_broadcast_response["snippet"]
-
-	# TOOD: write to log instead
-	print ("Broadcast '%s' with title '%s' was published at '%s'." % (insert_broadcast_response["id"], snippet["title"], snippet["publishedAt"]))
-
-	return insert_broadcast_response["id"]
+	return insert_broadcast_response
 
 # upload a thumbnail for a broadcast identified by its video-id
 def set_thumbnail(youtube, id: str, file: Path):
@@ -67,7 +65,7 @@ def set_thumbnail(youtube, id: str, file: Path):
 
 	return response
 
-def set_category(youtube, id: str, config):
+def set_snippets(youtube, id: str, config):
 	response = youtube.videos().update(
 		part="snippet",
 		body={
@@ -86,12 +84,19 @@ def set_category(youtube, id: str, config):
 def schedule_broadcast(thumbnail_path: Path, config: dict):
 	youtube = get_authenticated_service()
 	try:
-		broadcast_id = insert_broadcast(youtube, config)
+		print ("creating the broadcast")
+		result = insert_broadcast(youtube, config)
 
-		response = set_category(youtube, broadcast_id, config)
+		broadcast_id = result["id"]
+		title = result["snippet"]["title"]
+		published_at = result["snippet"]["publishedAt"]
 
-		print (response)
+		print(f"Broadwast '{broadcast_id}' with title '{title} was published at '{published_at}'")
 
-		response = set_thumbnail(youtube, broadcast_id, thumbnail_path)
+		print ("\nSetting the snippets")
+		print (set_snippets(youtube, broadcast_id, config))
+
+		print (f"\nSetting the thumbnail")
+		print (set_thumbnail(youtube, broadcast_id, thumbnail_path))
 	except HttpError as e:
 			print (f"A HTTP error {e.resp.status} occured:\n{e.content}")

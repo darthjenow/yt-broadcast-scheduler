@@ -1,0 +1,15 @@
+{
+	"date": {
+		"titleFormat": "%d.%m.%Y",
+		"descriptionFormat": "%d.%m.%Y",
+		"thumbnailFormat": "%Y-%m-%d.jpg"
+	},
+	"broadcast": {
+		"title": "sample title with replaced SONNTAGS_DATUM",
+		"description": "sample description with replaced SONNTAGS_DATUM",
+		"category": 22
+	},
+	"gDrive": {
+		"path": "Streaming/Thumbnails"
+	}
+}
