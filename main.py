@@ -1,9 +1,7 @@
 import json
 from pathlib import Path
-from datetime import datetime
-import tempfile
 
-from modules import youtube, date, gdrive
+from modules import youtube, date
 
 config = {}
 
@@ -19,24 +17,13 @@ def main():
 	next_sunday = date.get_next_sunday()
 
 	broadcast_data["title"] = broadcast_data["title"].replace("SONNTAGS_DATUM", next_sunday.strftime(config["date"]["titleFormat"]))
-	broadcast_data["description"] = broadcast_data["description"]	
+	broadcast_data["description"] = broadcast_data["description"].replace("SONNTAGS_DATUM", next_sunday.strftime(config["date"]["titleFormat"]))
 
-	# broadcast_data["scheduleDate"] = date.get_iso_date(next_sunday)
-	broadcast_data["scheduleDate"] = "2022-03-27T10:00:00+01:00"
-
-	# download the thumbnail from youtube
-	thumbnail_fo = tempfile.NamedTemporaryFile(delete=False)
-	thumbnail_fo.close()
-
-	thumbnail = Path(thumbnail_fo.name)
-	drive_path = Path(config["gDrive"]["path"]) / Path(date.get_youtube_title_date(next_sunday, config["date"]["thumbnailFormat"]))
-
-	gdrive.download_file(drive_path, thumbnail)
+	broadcast_data["scheduleDate"] = date.get_iso_date(next_sunday)
+	broadcast_data["thumbnailPath"] = Path(config["gDrive"]["path"]) / Path(date.get_youtube_title_date(next_sunday, config["date"]["thumbnailFormat"]))
 
 	# create the schedule
-	youtube.schedule_broadcast(thumbnail, broadcast_data)
-
-	thumbnail.unlink()
+	youtube.schedule_broadcast(broadcast_data, broadcast_data)
 
 if __name__ == "__main__":
 	main()

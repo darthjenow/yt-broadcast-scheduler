@@ -2,12 +2,22 @@
 Aims to automatically create planned YouTube broadcasts.
 Currently in development.
 
+## Installation
+You need the following python packages:
+- `bs4`
+- `google-api-python-client`
+- `goolge-auth-oauthlib`
+- `google-auth-httplib2`
+- `oauth2client`
+
+## Setup
+You need to enable the following APIs:
+- [Gmail](https://console.cloud.google.com/apis/library/gmail.googleapis.com)
+- [Google-Drive](https://console.developers.google.com/apis/api/drive.googleapis.com/overview)
+- [YouTube](https://console.cloud.google.com/apis/library/youtube.googleapis.com)
+
 ## (planned) Features
 - Thumbnail-Upload
+- send confirmation and errors over e-mail
 - create broadcasts by a schedule
-- have a list in Google-Drive with a list of dates for which no broadcast should be created. Date gets deleted after it has passed
-- have a list in Google-Drive with a list of dates that aren't Sundays and for which a broadcast should be created. Date gets deleted after it has passed
-
-# YouTube-Broadcast settings, that need to be implemented
-- Tags
-- Stream language
+- create broadcasts by mail-information --> optional thumbnail as attachment

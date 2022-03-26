@@ -1,6 +1,7 @@
 #!/usr/bin/python
 import httplib2
 from pathlib import Path
+import tempfile
 
 from apiclient.discovery import build
 from apiclient.errors import HttpError
@@ -8,6 +9,8 @@ from oauth2client.client import flow_from_clientsecrets
 from oauth2client.file import Storage
 from oauth2client.tools import run_flow
 from googleapiclient.http import MediaFileUpload
+
+from modules import gdrive
 
 THUMB_FILE = Path("thumb.jpg")
 
@@ -43,7 +46,7 @@ def insert_broadcast(youtube, config: dict):
 				"scheduledStartTime": config["scheduleDate"]
 			},
 			"status": {
-				"privacyStatus": "private",
+				"privacyStatus": config["privacyStatus"],
 				"selfDeclaredMadeForKids": False
 			},
 			"contentDetails": {
@@ -56,12 +59,22 @@ def insert_broadcast(youtube, config: dict):
 	return insert_broadcast_response
 
 # upload a thumbnail for a broadcast identified by its video-id
-def set_thumbnail(youtube, id: str, file: Path):
+def set_thumbnail(youtube, id: str, config):
+	# download the thumbnail from youtube
+	thumbnail_fo = tempfile.NamedTemporaryFile(delete=False)
+	thumbnail_fo.close()
+
+	thumbnail = Path(thumbnail_fo.name)
+
+	gdrive.download_file(config["thumbnailPath"], thumbnail)
+
 	request = youtube.thumbnails().set(
 			videoId=id,
-			media_body=MediaFileUpload(file)
+			media_body=MediaFileUpload(thumbnail)
 	)
 	response = request.execute()
+
+	thumbnail.unlink()
 
 	return response
 
@@ -74,13 +87,33 @@ def set_snippets(youtube, id: str, config):
 				"title": config["title"],
 				"categoryId": config["category"],
 				"description": config["description"],
-				"scheduledStartTime": config["scheduleDate"],
-				"tags": config["tags"]
+				"scheduledStartTime": config["scheduleDate"]
 			}
 		}
 	).execute()
 
 	return response	
+
+def add_playlists(youtube, broadcast_id, playlists):
+	responses = []
+
+	for playlist in playlists:
+		response = youtube.playlistItems().insert(
+			part="snippet",
+			body={
+				"snippet": {
+					"playlistId": playlist,
+					"resourceId": {
+						"kind": "youtube#video",
+						"videoId": broadcast_id
+					}
+				}
+			}
+		).execute()
+
+		responses.append(response)
+
+	return responses
 
 def schedule_broadcast(thumbnail_path: Path, config: dict):
 	youtube = get_authenticated_service()
@@ -99,5 +132,8 @@ def schedule_broadcast(thumbnail_path: Path, config: dict):
 
 		print (f"\nSetting the thumbnail")
 		print (set_thumbnail(youtube, broadcast_id, thumbnail_path))
+
+		print (f"\nAdding to playlists")
+		print (add_playlists(youtube, broadcast_id, config["playlists"]))
 	except HttpError as e:
 			print (f"A HTTP error {e.resp.status} occured:\n{e.content}")
