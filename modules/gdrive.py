@@ -36,7 +36,7 @@ def get_service(secrets_file: Path = SECRETS_FILE, token_file: Path = TOKEN_FILE
 
 	return service
 
-def get_dir_id(path: Path):
+def get_dir_id(path: Path) -> str:
 	if path.parent == Path("."):
 		id = "root"
 	else:
