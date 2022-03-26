@@ -74,12 +74,13 @@ def set_snippets(youtube, id: str, config):
 				"title": config["title"],
 				"categoryId": config["category"],
 				"description": config["description"],
-				"scheduledStartTime": config["scheduleDate"]
+				"scheduledStartTime": config["scheduleDate"],
+				"tags": config["tags"]
 			}
 		}
 	).execute()
 
-	return response
+	return response	
 
 def schedule_broadcast(thumbnail_path: Path, config: dict):
 	youtube = get_authenticated_service()
